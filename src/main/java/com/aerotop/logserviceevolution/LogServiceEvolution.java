@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -39,9 +40,9 @@ public class LogServiceEvolution {
                 }
             }
             //log.info("程序退出时执行缓存刷新!");
-            //System.out.println("----------------日志服务已退出----------------");
+            System.out.println("----------------日志服务已退出----------------");
             WriterSingle.getInstance().loggerInfo((byte)10,"刷新缓存","程序退出时执行缓存刷新!","","");
-            //WriterSingle.getInstance().close();
+            WriterSingle.getInstance().close();
         }));
         //初始化本地库记录对象
         WriterSingle.getInstance().setFrameType(FrameTypeEnum.DATAFRAME);
@@ -59,7 +60,16 @@ public class LogServiceEvolution {
     @PostConstruct
     private void createVersionFile() {
         try {
-            FileWriter fileWriter = new FileWriter(new File(versionPath + "/version.ini"));
+            File directory = new File(versionPath);
+            File file = null;
+            if(!directory.exists()){
+                directory.mkdirs();
+            }
+            file = new File(versionPath + "/version.ini");
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(file);
             fileWriter.write("v2.0-20200812-1600");
             fileWriter.close();
             //log.info("version.ini已生成!生成路径:" + versionPath + "/version.ini");

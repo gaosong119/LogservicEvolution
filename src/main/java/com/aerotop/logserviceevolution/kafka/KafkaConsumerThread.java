@@ -63,7 +63,7 @@ public class KafkaConsumerThread extends Thread {
     public void run() {
         boolean flag=false;
         while (true) {
-            ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofMillis(10));
+            ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofMillis(100));
             if(records.isEmpty()){
                 if(!flag){
                     for(MessageModel messageModel : MessageHandler.sendMapping.values()){
