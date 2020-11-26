@@ -1,6 +1,7 @@
 package com.aerotop.logserviceevolution.messageparse;
 
 import com.aerotop.logserviceevolution.configload.LoadConfig;
+import com.aerotop.pack.ByteConvertUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,8 +49,6 @@ public class ParseForLog {
                 String reserved = ByteConvertUtils.bytesToString(bytes,33+sendNamePreconditions+eventPreconditions+eventContentPreconditions,33+sendNamePreconditions+eventPreconditions+eventContentPreconditions+reservedPreconditions);
                 messageMap.put("reserved",reserved);
                 return messageMap;
-            }else if(1==frameType){//指令帧，执行其他业务操作
-
             }
         }
         return null;

@@ -17,7 +17,6 @@ import java.util.Properties;
  */
 @Component
 public class LoadConfig {
-    //private static final Logger log = LoggerFactory.getLogger(LoadConfig.class);//日志生成对象
 
     private static LoadConfig instance = new LoadConfig();//获取实例对象
 
@@ -47,19 +46,25 @@ public class LoadConfig {
 
     private String kafka_consumer_topic;//日志主题
 
-    private String transferValve;//是否启用日志转存
+    private String sourceIP;//发送方IP
 
-    private String diskThreshold;//磁盘占用率阈值
+    private String sourcePort;//发送方端口
 
-    private String dataServerIp;//数据服务器的ip地址
+    private String receiveIP;//接收方IP
 
-    private String dataServerUsername;//数据服务器的用户名
+    private String receivePort;//接收方端口
 
-    private String dataServerPassword;//数据服务器的密码
+    private String sourceSystemType;//信源-系统类型
 
-    private String dataServerDestDir;//数据服务器的目的文件夹
+    private String sourceSystemCode;//信源-系统编码
 
-    private String archiveCacheDir;//压缩包临时存储目录
+    private String sourceNodeCode;//信源-节点编码
+
+    private String receiveSystemType;//信宿-系统类型
+
+    private String receiveSystemCode;//信宿-系统编码
+
+    private String receiveNodeCode;//信宿-节点编码
 
     private Properties props;//用来初始化props
 
@@ -74,85 +79,105 @@ public class LoadConfig {
         return instance;
     }
 
-    public String getArchiveCacheDir() {
-        return archiveCacheDir;
+    public String getSourceIP() {
+        return sourceIP;
     }
-    @Value("${archiveCacheDir}")
-    public void setArchiveCacheDir(String archiveCacheDir) {
-        instance.archiveCacheDir = archiveCacheDir;
-        //log.info("加载压缩包临时存储目录配置:"+archiveCacheDir);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载压缩包临时存储目录配置"+archiveCacheDir,"","");
-    }
-
-    public String getDataServerIp() {
-        return dataServerIp;
+    @Value("${sourceIP}")
+    public void setSourceIP(String sourceIP) {
+        instance.sourceIP = sourceIP;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载发送方IP配置:"+sourceIP,"");
     }
 
-    @Value("${transferValve}")
-    public void setTransferValve(String transferValve) {
-        instance.transferValve = transferValve;
-        //log.info("加载是否启用日志转存配置:"+transferValve);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载是否启用日志转存配置:"+transferValve,"","");
+    public String getSourcePort() {
+        return sourcePort;
+    }
+    @Value("${sourcePort}")
+    public void setSourcePort(String sourcePort) {
+        instance.sourcePort = sourcePort;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载发送方端口配置:"+sourcePort,"");
     }
 
-    public Double getDiskThreshold() {
-        return Double.valueOf(diskThreshold);
+    public String getReceiveIP() {
+        return receiveIP;
     }
-    @Value("${diskThreshold}")
-    public void setDiskThreshold(String diskThreshold) {
-        instance.diskThreshold = diskThreshold;
-        //log.info("加载磁盘占用率阈值配置:"+diskThreshold);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载磁盘占用率阈值配置:"+diskThreshold,"","");
-    }
-
-    @Value("${dataServerIp}")
-    public void setDataServerIp(String dataServerIp) {
-        instance.dataServerIp = dataServerIp;
-        //log.info("加载数据服务器的ip地址配置:"+dataServerIp);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载数据服务器的ip地址配置:"+dataServerIp,"","");
+    @Value("${receiveIP}")
+    public void setReceiveIP(String receiveIP) {
+        instance.receiveIP = receiveIP;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载接收方IP配置:"+receiveIP,"");
     }
 
-    public String getDataServerUsername() {
-        return dataServerUsername;
+    public String getReceivePort() {
+        return receivePort;
     }
-    @Value("${dataServerUsername}")
-    public void setDataServerUsername(String dataServerUsername) {
-        instance.dataServerUsername = dataServerUsername;
-        //log.info("加载数据服务器的用户名配置:"+dataServerUsername);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载数据服务器的用户名配置:"+dataServerUsername,"","");
-    }
-
-    public String getDataServerPassword() {
-        return dataServerPassword;
-    }
-    @Value("${dataServerPassword}")
-    public void setDataServerPassword(String dataServerPassword) {
-        instance.dataServerPassword = dataServerPassword;
-        //log.info("加载数据服务器的密码配置:"+dataServerPassword);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载数据服务器的密码配置:"+dataServerPassword,"","");
+    @Value("${receivePort}")
+    public void setReceivePort(String receivePort) {
+        instance.receivePort = receivePort;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载接收方端口配置:"+receivePort,"");
     }
 
-    public String getDataServerDestDir() {
-        return dataServerDestDir;
+    public String getSourceSystemType() {
+        return sourceSystemType;
     }
-    @Value("${dataServerDestDir}")
-    public void setDataServerDestDir(String dataServerDestDir) {
-        instance.dataServerDestDir = dataServerDestDir;
-        //log.info("加载数据服务器的目的文件夹配置:"+dataServerDestDir);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载数据服务器的目的文件夹配置:"+dataServerDestDir,"","");
+    @Value("${source_system_type}")
+    public void setSourceSystemType(String sourceSystemType) {
+        instance.sourceSystemType = sourceSystemType;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信源-系统类型配置:"+sourceSystemType,"");
+    }
+
+    public String getSourceSystemCode() {
+        return sourceSystemCode;
+    }
+    @Value("${source_system_code}")
+    public void setSourceSystemCode(String sourceSystemCode) {
+        instance.sourceSystemCode = sourceSystemCode;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信源-系统编码配置:"+sourceSystemCode,"");
+    }
+
+    public String getSourceNodeCode() {
+        return sourceNodeCode;
+    }
+    @Value("${source_node_code}")
+    public void setSourceNodeCode(String sourceNodeCode) {
+        instance.sourceNodeCode = sourceNodeCode;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信源-节点编码配置:"+sourceNodeCode,"");
+    }
+
+    public String getReceiveSystemType() {
+        return receiveSystemType;
+    }
+    @Value("${receive_system_type}")
+    public void setReceiveSystemType(String receiveSystemType) {
+        instance.receiveSystemType = receiveSystemType;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信宿-系统类型配置:"+sourceSystemType,"");
+    }
+
+    public String getReceiveSystemCode() {
+        return receiveSystemCode;
+    }
+    @Value("${receive_system_code}")
+    public void setReceiveSystemCode(String receiveSystemCode) {
+        instance.receiveSystemCode = receiveSystemCode;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信宿-系统编码配置:"+receiveSystemCode,"");
+    }
+
+    public String getReceiveNodeCode() {
+        return receiveNodeCode;
+    }
+    @Value("${receive_node_code}")
+    public void setReceiveNodeCode(String receiveNodeCode) {
+        instance.receiveNodeCode = receiveNodeCode;
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载信宿-节点编码配置:"+receiveNodeCode,"");
     }
 
     @Value("${fileRootPath}")
     public void setFileNamePattern(String fileRootPath) {
         instance.fileRootPath = fileRootPath;
-        //log.info("加载文件创建根目录配置:"+fileRootPath);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载文件创建根目录配置:"+fileRootPath,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载文件创建根目录配置:"+fileRootPath,"");
     }
     @Value("${maxFileSize}")
     public void setMaxFileSize(int maxFileSize) {
         instance.maxFileSize = maxFileSize;
-        //log.info("加载maxFileSize单个日志文件大小配置:"+maxFileSize);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载maxFileSize单个日志文件大小配置:"+maxFileSize,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载maxFileSize单个日志文件大小配置:"+maxFileSize,"");
     }
     public int getMaxFileSize() {
         return maxFileSize*1024*1024;
@@ -176,51 +201,43 @@ public class LoadConfig {
     @Value("${kafka.bootstrap-servers}")
     public void setKafka_bootstrap_servers(String kafka_bootstrap_servers) {
         instance.kafka_bootstrap_servers = kafka_bootstrap_servers;
-        //log.info("加载 application.properties中kafka.bootstrap-servers:"+kafka_bootstrap_servers);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.bootstrap-servers:"+kafka_bootstrap_servers,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.bootstrap-servers:"+kafka_bootstrap_servers,"");
     }
     @Value("${kafka.consumer.group-id}")
     public void setKafka_consumer_group_id(String kafka_consumer_group_id) {
         instance.kafka_consumer_group_id = kafka_consumer_group_id;
-        //log.info("加载 application.properties中kafka.consumer.group-id:"+kafka_consumer_group_id);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.group-id:"+kafka_consumer_group_id,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.group-id:"+kafka_consumer_group_id,"");
     }
     @Value("${kafka.consumer.client-id}")
     public void setKafka_consumer_client_id(String kafka_consumer_client_id) {
         instance.kafka_consumer_client_id = kafka_consumer_client_id;
-        //log.info("加载 application.properties中kafka.consumer.client-id:"+kafka_consumer_client_id);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.client-id:"+kafka_consumer_client_id,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.client-id:"+kafka_consumer_client_id,"");
     }
 
     @Value("${kafka.consumer.key-deserializer}")
     public void setKafka_consumer_key_deserializer(String kafka_consumer_key_deserializer) {
         instance.kafka_consumer_key_deserializer = kafka_consumer_key_deserializer;
-        //log.info("加载 application.properties中kafka.consumer.key-deserializer:"+kafka_consumer_key_deserializer);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.key-deserializer:"+kafka_consumer_key_deserializer,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.key-deserializer:"+kafka_consumer_key_deserializer,"");
     }
     @Value("${kafka.consumer.value-deserializer}")
     public void setKafka_consumer_value_deserializer(String kafka_consumer_value_deserializer) {
         instance.kafka_consumer_value_deserializer = kafka_consumer_value_deserializer;
-        //log.info("加载 application.properties中kafka.consumer.value-deserializer:"+kafka_consumer_value_deserializer);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.value-deserializer:"+kafka_consumer_value_deserializer,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.value-deserializer:"+kafka_consumer_value_deserializer,"");
     }
     @Value("${kafka.consumer.enable-auto-commit}")
     public void setKafka_consumer_enable_auto_commit(String kafka_consumer_enable_auto_commit) {
         instance.kafka_consumer_enable_auto_commit = kafka_consumer_enable_auto_commit;
-        //log.info("加载 application.properties中kafka.consumer.enable-auto-commit:"+kafka_consumer_enable_auto_commit);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.enable-auto-commit:"+kafka_consumer_enable_auto_commit,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.enable-auto-commit:"+kafka_consumer_enable_auto_commit,"");
     }
     @Value("${kafka.consumer.auto-commit-interval.ms}")
     public void setKafka_consumer_auto_commit_interval_ms(int kafka_consumer_auto_commit_interval_ms) {
         instance.kafka_consumer_auto_commit_interval_ms = kafka_consumer_auto_commit_interval_ms;
-        //log.info("加载 application.properties中kafka.consumer.auto-commit-interval.ms:"+kafka_consumer_auto_commit_interval_ms);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.auto-commit-interval.ms:"+kafka_consumer_auto_commit_interval_ms,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka.consumer.auto-commit-interval.ms:"+kafka_consumer_auto_commit_interval_ms,"");
     }
     @Value("${kafka.consumer.topic}")
     public void setKafka_consumer_topic(String kafka_consumer_topic) {
         instance.kafka_consumer_topic = kafka_consumer_topic;
-        //log.info("加载 application.properties中kafka_consumer_topic:"+kafka_consumer_topic);
-        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka_consumer_topic:"+kafka_consumer_topic,"","");
+        WriterSingle.getInstance().loggerInfo((byte)10,"记录日志","加载 application.properties中kafka_consumer_topic:"+kafka_consumer_topic,"");
     }
 
     /**
@@ -246,6 +263,7 @@ public class LoadConfig {
         properties.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,"10000");
         properties.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG,"2097512");
         properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG,"1048576");
+        properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,"org.apache.kafka.clients.consumer.StickyAssignor");
         instance.props = properties;
     }
 

@@ -1,5 +1,7 @@
 package com.aerotop.logserviceevolution.messageparse;
 
+import com.aerotop.pack.ByteConvertUtils;
+
 import java.nio.charset.StandardCharsets;
 
 /**

@@ -16,7 +16,6 @@ import java.util.Objects;
  * @Date 2020/7/21 14:54
  */
 public class MessageHandler {
-    //private static final Logger log = LoggerFactory.getLogger(MessageHandler.class);//日志生成对象
     //软件发送方与MessageModel对应的集合
     public static Map<String, MessageModel> sendMapping = new HashMap<>();
 
@@ -66,7 +65,7 @@ public class MessageHandler {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 e.printStackTrace(new PrintStream(baos));
                 //log.error(baos.toString());
-                WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"","");
+                WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"");
             }
             //创建新文件
             initMessageModel(sourceName,messageModel);
@@ -87,8 +86,7 @@ public class MessageHandler {
         } catch (IOException e) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(baos));
-            //log.error(baos.toString());
-            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"","");
+            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"");
         }
     }
 
@@ -143,8 +141,7 @@ public class MessageHandler {
         } catch (IOException e) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(baos));
-            //log.error(baos.toString());
-            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"","");
+            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"");
         }
     }
 }

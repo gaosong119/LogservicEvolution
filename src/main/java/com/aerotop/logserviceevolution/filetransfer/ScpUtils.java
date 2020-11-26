@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
  * @Date 2020/9/22 15:40
  */
 public class ScpUtils {
-    private static final Logger log = LoggerFactory.getLogger(ScpUtils.class);//日志生成对象
+/*    private static final Logger log = LoggerFactory.getLogger(ScpUtils.class);//日志生成对象
 
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//日期格式化
 
@@ -41,5 +41,5 @@ public class ScpUtils {
             e.printStackTrace(new PrintStream(baos));
             log.error(baos.toString());
         }
-    }
+    }*/
 }

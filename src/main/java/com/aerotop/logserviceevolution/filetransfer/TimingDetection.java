@@ -25,7 +25,7 @@ import java.io.PrintStream;
 @ConditionalOnProperty(name ="transferValve",havingValue = "true",matchIfMissing = false)
 @Configuration*/
 public class TimingDetection {
-    private static final Logger logger = LoggerFactory.getLogger(TimingDetection.class);//日志生成对象
+/*    private static final Logger logger = LoggerFactory.getLogger(TimingDetection.class);//日志生成对象
     @Scheduled(fixedDelayString = "${cronFormula}")
     public void diskUsageStatistics(){
         try {
@@ -55,7 +55,7 @@ public class TimingDetection {
             e.printStackTrace(new PrintStream(baos));
             logger.error(baos.toString());
         }
-    }
+    }*/
 
 /*    @PostConstruct
     public void startKafkaConsumer(){
