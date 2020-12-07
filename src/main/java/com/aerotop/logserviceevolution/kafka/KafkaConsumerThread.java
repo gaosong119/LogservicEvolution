@@ -1,9 +1,11 @@
 package com.aerotop.logserviceevolution.kafka;
 
-import com.aerotop.logserviceevolution.messagehandler.MessageHandler;
-import com.aerotop.logserviceevolution.messagehandler.MessageModel;
+import com.aerotop.enums.FrameTypeEnum;
+import com.aerotop.enums.LogLevelEnum;
+import com.aerotop.logserviceevolution.LogServiceEvolution;
+import com.aerotop.logserviceevolution.configload.LoadConfig;
 import com.aerotop.logserviceevolution.messageparse.ParseForLog;
-import com.aerotop.transfer.WriterSingle;
+import com.aerotop.message.Message;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -24,6 +26,10 @@ import java.util.Properties;
  * @Date 2020/7/20 8:44
  */
 public class KafkaConsumerThread extends Thread {
+    //日志记录对象
+    private Message message = new Message(FrameTypeEnum.DATAFRAME,"日志服务",LogLevelEnum.info,
+            System.currentTimeMillis(),(byte)10,"","","",LoadConfig.getInstance().
+            getKafka_consumer_topic());
     //声明 kafkaConsumer
     public static KafkaConsumer<String, byte[]> kafkaConsumer;
 
@@ -38,58 +44,83 @@ public class KafkaConsumerThread extends Thread {
         try {
             kafkaConsumer = new KafkaConsumer<>(props);
             kafkaConsumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {
+                /**
+                 * @Description: 此方法会在消费者停止消费消费后，在重平衡开始前调用
+                 * @Author: gaosong
+                 * @Date: 2020/12/3 15:58
+                 * @param partitions: 主题分区对象集合
+                 * @return: void
+                 **/
                 @Override
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-                    //此方法会在消费者停止消费消费后，在重平衡开始前调用
-                    WriterSingle.getInstance().loggerInfo((byte) 10, "kafka即将执行重平衡机制", "已收到重平衡信号,即将进入重平衡阶段", "");
-                    //同步提交消费位移(防止重复消费)
+                    //同步提交消费位移(防止重复消费),提交完毕再切换分区
                     kafkaConsumer.commitSync();
-                }
 
+                    message.setReserved("kafka即将执行重平衡机制,已执行同步提交操作");
+                    LogServiceEvolution.writerServiceImpl.logger(message);
+                    LogServiceEvolution.writerServiceImpl.flushChannel();
+                }
+                /**
+                 * @Description: 此方法在分区分配给消费者后，在消费者开始读取消息前调用
+                 * @Author: gaosong
+                 * @Date: 2020/12/3 15:58
+                 * @param partitions: 主题分区对象集合
+                 * @return: void
+                 **/
                 @Override
                 public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                    //此方法在分区分配给消费者后，在消费者开始读取消息前调用
-                    WriterSingle.getInstance().loggerInfo((byte) 10, "kafka执行重平衡机制完毕", "分区已重新分配消费者,即将消费消息", "");
+
                     //打印订阅信息
                     for (TopicPartition topicPartition : partitions) {
-                        WriterSingle.getInstance().loggerInfo((byte) 10, "记录分区重平衡之后订阅主题信息", "已订阅" + topic + "主题下" + topicPartition + "分区", "");
+                        message.setReserved("kafka执行重平衡机制完毕,已订阅" + topic + "主题下" + topicPartition + "分区");
+                        LogServiceEvolution.writerServiceImpl.logger(message);
+                        LogServiceEvolution.writerServiceImpl.flushChannel();
                     }
                     //设置从分区末尾开始消费
                     kafkaConsumer.seekToEnd(partitions);
+                    message.setReserved("已设置从分区末尾开始消费");
+                    LogServiceEvolution.writerServiceImpl.logger(message);
+                    LogServiceEvolution.writerServiceImpl.flushChannel();
                 }
             });
         }catch (Exception e){
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            e.printStackTrace(new PrintStream(baos));
-            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"");
+            ByteArrayOutputStream baoS = new ByteArrayOutputStream();
+            e.printStackTrace(new PrintStream(baoS));
+            message.setLoglevel(LogLevelEnum.error);
+            message.setReserved(baoS.toString());
+            LogServiceEvolution.writerServiceImpl.logger(message);
         }
     }
 
     @Override
     public void run() {
+        //是否刷新通道缓存标志
         boolean flag=false;
         try{
             while (true) {
                 ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(Duration.ofMillis(100));
                 if(records.isEmpty()){
                     if(!flag){
-                        for(MessageModel messageModel : MessageHandler.sendMapping.values()){
-                            messageModel.getBufferedOutputStream().flush();
-                        }
+                        //实现刷新通道
+                        LogServiceEvolution.writerServiceImpl.flushChannel();
                         flag = true;
                     }
                 }else{
                     flag=false;
                     for (ConsumerRecord<String, byte[]> record : records) {
                         //调用消息处理模块
-                        MessageHandler.messageProcess(ParseForLog.unPack(record.value()));
+                        LogServiceEvolution.writerServiceImpl.logger(ParseForLog.unPack(record.value()));
                     }
                 }
             }
         }catch (Exception e){
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            e.printStackTrace(new PrintStream(baos));
-            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"");
+            ByteArrayOutputStream baoS = new ByteArrayOutputStream();
+            e.printStackTrace(new PrintStream(baoS));
+            message.setLoglevel(LogLevelEnum.error);
+            message.setReserved(baoS.toString());
+            LogServiceEvolution.writerServiceImpl.logger(message);
+            //将日志内容刷新到文件
+            LogServiceEvolution.writerServiceImpl.flushChannel();
         }
     }
 }

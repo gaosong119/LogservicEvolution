@@ -1,9 +1,11 @@
 package com.aerotop.logserviceevolution.messageparse;
 
+import com.aerotop.enums.FrameTypeEnum;
+import com.aerotop.enums.LogLevelEnum;
+import com.aerotop.logserviceevolution.LogServiceEvolution;
+import com.aerotop.logserviceevolution.configload.LoadConfig;
+import com.aerotop.message.Message;
 import com.aerotop.pack.ByteConvertUtils;
-import com.aerotop.transfer.WriterSingle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @ClassName: CheckMessageHeader
@@ -12,6 +14,10 @@ import org.slf4j.LoggerFactory;
  * @Date 2020/7/16 16:51
  */
 public class CheckMessageHeader {
+    //日志记录对象
+    private static Message message = new Message(FrameTypeEnum.DATAFRAME,"日志服务", LogLevelEnum.error,
+            System.currentTimeMillis(),(byte)10,"","","", LoadConfig.getInstance().
+            getKafka_consumer_topic());
     /**
      * @Description 判断消息是否满足解析要求，满足返回true,否则返回false
      * @parm bytes:二进制数据
@@ -35,7 +41,10 @@ public class CheckMessageHeader {
         if(bytes!=null && bytes.length>0){
             if(190 != (bytes[0]&255)){//0xBE开头
                 flag = false;
-                WriterSingle.getInstance().loggerError((byte)10,"通信帧完整性校验","校验通信帧标识错误,必须0xBE开头!","");
+                message.setReserved("校验通信帧标识错误,必须0xBE开头!");
+                LogServiceEvolution.writerServiceImpl.logger(message);
+                //将日志内容刷新到文件
+                LogServiceEvolution.writerServiceImpl.flushChannel();
             }
         }
         return flag;
@@ -59,8 +68,10 @@ public class CheckMessageHeader {
             if((total & 255)==(bytes[1] & 255)){//与校验和一致
                 flag = true;
             }else {
-                //log.error("校验和计算错误!");
-                WriterSingle.getInstance().loggerError((byte)10,"通信帧完整性校验","校验和计算错误!","");
+                message.setReserved("校验和计算错误!");
+                LogServiceEvolution.writerServiceImpl.logger(message);
+                //将日志内容刷新到文件
+                LogServiceEvolution.writerServiceImpl.flushChannel();
             }
         }
         return flag;
@@ -81,7 +92,10 @@ public class CheckMessageHeader {
             if(bytes.length==frameLength){//等于帧长
                 flag = true;
             }else{
-                WriterSingle.getInstance().loggerError((byte)10,"通信帧完整性校验","计算帧长错误!","");
+                message.setReserved("计算帧长错误!");
+                LogServiceEvolution.writerServiceImpl.logger(message);
+                //将日志内容刷新到文件
+                LogServiceEvolution.writerServiceImpl.flushChannel();
             }
         }
         return flag;

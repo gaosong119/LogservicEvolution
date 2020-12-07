@@ -1,17 +1,24 @@
 package com.aerotop.logserviceevolution;
 
+import com.aerotop.logserviceevolution.monitor.MonitorInfoBean;
+import com.aerotop.logserviceevolution.monitor.MonitorServiceImpl;
+import com.aerotop.logserviceevolution.selfinspection.HandlerUtilForUDP;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 @SpringBootTest
 class LogserviceframeupApplicationTests {
 
     @Test
     void contextLoads() {
-        long l = System.currentTimeMillis();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
-        System.out.println(simpleDateFormat.format(l));
+        MonitorInfoBean monitorInfoBean = new MonitorServiceImpl().getMonitorInfoBean();
+        System.out.println("Cpu占用率:"+monitorInfoBean.getCpuRatio());
+        System.out.println("内存占用:"+monitorInfoBean.getUsedMemory()+"MB");
+        byte[] bytes = HandlerUtilForUDP.selfInspectionPack(monitorInfoBean);
+        System.out.println("字节数组长度:---->"+bytes.length);
+        System.out.println("原数组内容:---->"+bytes);
+        System.out.println("toString后内容:"+ Arrays.toString(bytes));
     }
 }

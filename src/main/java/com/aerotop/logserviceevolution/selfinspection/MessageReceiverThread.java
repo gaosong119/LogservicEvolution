@@ -1,15 +1,18 @@
 package com.aerotop.logserviceevolution.selfinspection;
 
+import com.aerotop.enums.FrameTypeEnum;
+import com.aerotop.enums.LogLevelEnum;
+import com.aerotop.logserviceevolution.LogServiceEvolution;
 import com.aerotop.logserviceevolution.configload.LoadConfig;
 import com.aerotop.logserviceevolution.monitor.MonitorServiceImpl;
-import com.aerotop.transfer.WriterSingle;
+import com.aerotop.message.Message;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Arrays;
 
 /**
  * @ClassName: MessageReceiverThread
@@ -18,6 +21,10 @@ import java.util.Arrays;
  * @Date 2020/11/24 16:58
  */
 public class MessageReceiverThread extends Thread {
+    //日志记录对象
+    private Message message = new Message(FrameTypeEnum.DATAFRAME,"日志服务", LogLevelEnum.info,
+            System.currentTimeMillis(),(byte)10,"","","",LoadConfig.getInstance().
+            getKafka_consumer_topic());
     //自检对象
     private MonitorServiceImpl monitorServiceImpl = new MonitorServiceImpl();
     /**
@@ -29,24 +36,28 @@ public class MessageReceiverThread extends Thread {
     @Override
     public void run() {
         try {
+            // 1.创建服务器端DatagramSocket，绑定接收方配置端口
+            DatagramSocket socket = new DatagramSocket(Integer.parseInt(LoadConfig.getInstance().getReceivePort()));
+            // 2.创建数据报，用于接收客户端发送的数据
+            byte[] data = new byte[1024];// 创建字节数组，指定接收的数据包的大小
+            DatagramPacket packet = new DatagramPacket(data, data.length);
+            // 3.接收客户端发送的数据
+            message.setReserved("服务器端已经启动,监听本机端口号:"+Integer.parseInt(LoadConfig.getInstance().getReceivePort()));
+            LogServiceEvolution.writerServiceImpl.logger(message);
+            //将日志内容刷新到文件
+            LogServiceEvolution.writerServiceImpl.flushChannel();
             while(true){
-                //接收发送方数据
-                // 1.创建服务器端DatagramSocket，绑定发送方配置端口
-                DatagramSocket socket = new DatagramSocket(Integer.parseInt(LoadConfig.getInstance().getSourcePort()));
-                // 2.创建数据报，用于接收客户端发送的数据
-                byte[] data = new byte[1024];// 创建字节数组，指定接收的数据包的大小
-                DatagramPacket packet = new DatagramPacket(data, data.length);
-                // 3.接收客户端发送的数据
-                WriterSingle.getInstance().loggerInfo((byte)10,"监听udp端口","服务器端已经启动，等待客户端" +
-                        "发送数据","监听端口号:"+Integer.parseInt(LoadConfig.getInstance().getSourcePort()));
                 socket.receive(packet);// 此方法在接收到数据报之前会一直阻塞
-                WriterSingle.getInstance().loggerInfo((byte)10,"服务端收到数据","即将校验数据合法性" ,
-                        "若通过校验则返回自检结果");
+                message.setReserved("服务端收到数据,即将校验数据合法性,若通过校验则返回自检结果");
+                LogServiceEvolution.writerServiceImpl.logger(message);
                 // 4.读取并解析数据
                 boolean checkResult =HandlerUtilForUDP.legalVerification(data);
                 if(!checkResult){//未通过校验
-                    WriterSingle.getInstance().loggerInfo((byte)10,"校验数据是否符合规则","未通过校验",
-                            "丢弃此数据:"+ Arrays.toString(data));
+                    message.setLoglevel(LogLevelEnum.error);
+                    message.setReserved("未通过校验丢弃此数据:"+ DatatypeConverter.printHexBinary(data));
+                    LogServiceEvolution.writerServiceImpl.logger(message);
+                    //将日志内容刷新到文件
+                    LogServiceEvolution.writerServiceImpl.flushChannel();
                     continue;
                 }
                 //通过校验则向客户端响应数据
@@ -59,11 +70,18 @@ public class MessageReceiverThread extends Thread {
                 DatagramPacket packetSend = new DatagramPacket(selfInspection, selfInspection.length, address, port);
                 // 3.响应客户端
                 socket.send(packetSend);
+                message.setLoglevel(LogLevelEnum.info);
+                message.setReserved("向"+address.toString()+":"+port+"发送自检数据:"+ DatatypeConverter.printHexBinary(selfInspection));
+                LogServiceEvolution.writerServiceImpl.logger(message);
+                //将日志内容刷新到文件
+                LogServiceEvolution.writerServiceImpl.flushChannel();
             }
         } catch (Exception e) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            e.printStackTrace(new PrintStream(baos));
-            WriterSingle.getInstance().loggerError((byte)10,"错误捕捉",baos.toString(),"自检模块UDP通信错误");
+            ByteArrayOutputStream baoS = new ByteArrayOutputStream();
+            e.printStackTrace(new PrintStream(baoS));
+            message.setLoglevel(LogLevelEnum.error);
+            message.setReserved(baoS.toString());
+            LogServiceEvolution.writerServiceImpl.logger(message);
         }
     }
 }
