@@ -68,7 +68,7 @@ public class LogServiceEvolution {
     @PostConstruct
     private void createVersionFile() {
         try {
-            String versionCount = "v2.12-20200812-1600";
+            String versionCount = "v2.12-20201212-1600";
             File directory = new File(versionPath);
             File file;
             if(!directory.exists()){

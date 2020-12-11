@@ -48,24 +48,27 @@ public class MessageReceiverThread extends Thread {
             LogServiceEvolution.writerServiceImpl.flushChannel();
             while(true){
                 socket.receive(packet);// 此方法在接收到数据报之前会一直阻塞
-                message.setReserved("服务端收到数据,即将校验数据合法性,若通过校验则返回自检结果");
+                message.setReserved("服务端收到数据");
                 LogServiceEvolution.writerServiceImpl.logger(message);
                 // 4.读取并解析数据
-                boolean checkResult =HandlerUtilForUDP.legalVerification(data);
-                if(!checkResult){//未通过校验
+                //boolean checkResult =HandlerUtilForUDP.legalVerification(data);
+                /*if(!checkResult){//未通过校验
                     message.setLoglevel(LogLevelEnum.error);
                     message.setReserved("未通过校验丢弃此数据:"+ DatatypeConverter.printHexBinary(data));
                     LogServiceEvolution.writerServiceImpl.logger(message);
                     //将日志内容刷新到文件
                     LogServiceEvolution.writerServiceImpl.flushChannel();
                     continue;
-                }
+                }*/
                 //通过校验则向客户端响应数据
                 // 1.定义客户端的地址、端口号、数据
                 InetAddress address = packet.getAddress();
-                int port = packet.getPort();
+                //int port = packet.getPort();
+                int port = Integer.parseInt(LoadConfig.getInstance().getFeedbackPort());
                 //执行组包
-                byte[] selfInspection = HandlerUtilForUDP.selfInspectionPack(monitorServiceImpl.getMonitorInfoBean());
+                byte[] selfInspection = CommunicationPackage.resultPackage(
+                        HandlerUtilForUDP.selfInspectionPack(monitorServiceImpl.getMonitorInfoBean())
+                );
                 // 2.创建数据报，包含响应的数据信息
                 DatagramPacket packetSend = new DatagramPacket(selfInspection, selfInspection.length, address, port);
                 // 3.响应客户端

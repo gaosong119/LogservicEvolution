@@ -27,13 +27,15 @@ public class LoadConfig {
 
     private String kafka_bootstrap_servers;//consumer连接kafka集群所需的broker地址清单
 
-    private String kafka_consumer_group_id;//消费者组
+    private String kafka_consumer_group_id;//消费者组id
 
     private String kafka_consumer_client_id;//消费者client-id
 
     private String kafka_consumer_topic;//日志主题
 
     private String receivePort;//接收方端口
+
+    private String feedbackPort;//自检软件接收端口
 
     private String sourceSystemType;//信源-系统类型
 
@@ -51,7 +53,7 @@ public class LoadConfig {
 
     private LoadConfig() {}
     /**
-     * @Description 获取FileContentRuleSingle实例对象
+     * @Description 获取LoadConfig实例对象
      * @Return instance
      * @Author gaosong
      * @Date 2020/7/16 14:09
@@ -67,6 +69,16 @@ public class LoadConfig {
     public void setReceivePort(String receivePort) {
         instance.receivePort = receivePort;
         message.setReserved("加载接收方UDP监听端口:"+receivePort);
+        LogServiceEvolution.writerServiceImpl.logger(message);
+    }
+
+    public String getFeedbackPort() {
+        return feedbackPort;
+    }
+    @Value("${feedbackPort}")
+    public void setFeedbackPort(String feedbackPort) {
+        instance.feedbackPort = feedbackPort;
+        message.setReserved("加载自检软件接收端口:"+feedbackPort);
         LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
