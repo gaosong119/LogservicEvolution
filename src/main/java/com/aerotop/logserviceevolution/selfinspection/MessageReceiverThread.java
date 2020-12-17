@@ -66,9 +66,7 @@ public class MessageReceiverThread extends Thread {
                 //int port = packet.getPort();
                 int port = Integer.parseInt(LoadConfig.getInstance().getFeedbackPort());
                 //执行组包
-                byte[] selfInspection = CommunicationPackage.resultPackage(
-                        HandlerUtilForUDP.selfInspectionPack(monitorServiceImpl.getMonitorInfoBean())
-                );
+                byte[] selfInspection = HandlerUtilForUDP.selfInspectionPack(monitorServiceImpl.getMonitorInfoBean());
                 // 2.创建数据报，包含响应的数据信息
                 DatagramPacket packetSend = new DatagramPacket(selfInspection, selfInspection.length, address, port);
                 // 3.响应客户端

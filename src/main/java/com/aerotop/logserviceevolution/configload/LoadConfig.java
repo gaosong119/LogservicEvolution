@@ -43,11 +43,15 @@ public class LoadConfig {
 
     private String sourceNodeCode;//信源-节点编码
 
+    private String sourceSoftID;//信源-软件标识
+
     private String receiveSystemType;//信宿-系统类型
 
     private String receiveSystemCode;//信宿-系统编码
 
     private String receiveNodeCode;//信宿-节点编码
+
+    private String receiveSoftID;//信宿-软件标识
 
     private Properties props;//用来初始化props
 
@@ -60,6 +64,22 @@ public class LoadConfig {
      */
     public static LoadConfig getInstance(){
         return instance;
+    }
+
+    public String getReceiveSoftID() {
+        return receiveSoftID;
+    }
+    @Value("${source_soft_ID}")
+    public void setReceiveSoftID(String receiveSoftID) {
+        instance.receiveSoftID = receiveSoftID;
+    }
+
+    public String getSourceSoftID() {
+        return sourceSoftID;
+    }
+    @Value("${source_soft_ID}")
+    public void setSourceSoftID(String sourceSoftID) {
+        instance.sourceSoftID = sourceSoftID;
     }
 
     public String getReceivePort() {

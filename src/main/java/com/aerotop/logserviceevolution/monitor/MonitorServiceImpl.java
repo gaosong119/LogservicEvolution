@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * @ClassName: MonitorServiceImpl
- * @Description: TODO
+ * @Description: 自检功能实现类
  * @Author: gaosong
  * @Date 2020/8/14 9:57
  */
@@ -50,9 +50,9 @@ public class MonitorServiceImpl implements IMonitorService{
         // 操作系统
         String osName = System.getProperty("os.name");
         // 总的物理内存
-        long totalMemorySize = osmxb.getTotalPhysicalMemorySize() / kb;
+        long totalMemorySize = osmxb.getTotalPhysicalMemorySize() / kb /kb;
         // 剩余的物理内存
-        long freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize() / kb;
+        long freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize() / kb /kb;
         // 已使用的物理内存
         float usedMemory = 0;
         // 获得线程总数
@@ -61,7 +61,8 @@ public class MonitorServiceImpl implements IMonitorService{
         int totalThread = parentThread.activeCount();
         float cpuRatio = 0;
         if (osName.toLowerCase().startsWith("windows")) {
-            usedMemory = (osmxb.getTotalPhysicalMemorySize() - osmxb.getFreePhysicalMemorySize()) / kb /kb;
+            //usedMemory = (osmxb.getTotalPhysicalMemorySize() - osmxb.getFreePhysicalMemorySize()) / kb /kb;
+            usedMemory = totalMemorySize-freePhysicalMemorySize;
             cpuRatio = this.getCpuRatioForWindows();
         } else {
             //cpuRatio = getCpuRateForLinux();
@@ -85,11 +86,15 @@ public class MonitorServiceImpl implements IMonitorService{
                             usedMemory = new BigDecimal(info).divide(PERCENT).floatValue();
                             message.setReserved("获取Linux环境下当前进程占用" +"的物理内存值:" + usedMemory+" MB");
                             LogServiceEvolution.writerServiceImpl.logger(message);
+                            //将日志内容刷新到文件
+                            LogServiceEvolution.writerServiceImpl.flushChannel();
                         }
                         if (m == 8) {//第九列为CPU的占用百分比
                             cpuRatio = new BigDecimal(info).divide(BigDecimal.valueOf(100)).floatValue();
                             message.setReserved("获取Linux环境下当前进程占用CPU信息:" + cpuRatio);
                             LogServiceEvolution.writerServiceImpl.logger(message);
+                            //将日志内容刷新到文件
+                            LogServiceEvolution.writerServiceImpl.flushChannel();
                         }
                         m++;
                     }
@@ -100,6 +105,8 @@ public class MonitorServiceImpl implements IMonitorService{
                 message.setLoglevel(LogLevelEnum.error);
                 message.setReserved(baoS.toString());
                 LogServiceEvolution.writerServiceImpl.logger(message);
+                //将日志内容刷新到文件
+                LogServiceEvolution.writerServiceImpl.flushChannel();
             }finally {
                 try {
                     if(bufferedReader!=null){
@@ -111,6 +118,8 @@ public class MonitorServiceImpl implements IMonitorService{
                     message.setLoglevel(LogLevelEnum.error);
                     message.setReserved(baoS.toString());
                     LogServiceEvolution.writerServiceImpl.logger(message);
+                    //将日志内容刷新到文件
+                    LogServiceEvolution.writerServiceImpl.flushChannel();
                 }
             }
         }

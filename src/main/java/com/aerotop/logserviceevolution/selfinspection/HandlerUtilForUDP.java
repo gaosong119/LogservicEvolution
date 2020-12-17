@@ -1,7 +1,6 @@
 package com.aerotop.logserviceevolution.selfinspection;
 
 import com.aerotop.logserviceevolution.configload.LoadConfig;
-import com.aerotop.logserviceevolution.messageparse.CheckMessageHeader;
 import com.aerotop.logserviceevolution.monitor.MonitorInfoBean;
 import com.aerotop.pack.ByteConvertUtils;
 
@@ -22,7 +21,7 @@ public class HandlerUtilForUDP {
      * @param data: 端口接收数据
      * @return: boolean
      **/
-    public static boolean legalVerification(byte[] data) {
+/*    public static boolean legalVerification(byte[] data) {
         boolean result = false;
         //检查帧同步标识
         Boolean frameMarkResult = CheckMessageHeader.checkFrameMark(data);
@@ -32,7 +31,7 @@ public class HandlerUtilForUDP {
             result = true;
         }
         return result;
-    }
+    }*/
     /**
      * @Description: 检查信源 系统类型、系统编码、节点编码是否与配置文件相同
      * @Author: gaosong
@@ -40,7 +39,7 @@ public class HandlerUtilForUDP {
      * @param dataS: 数据包
      * @return: java.lang.Boolean
      **/
-    private static Boolean sourceVerification(byte[] dataS) {
+/*    private static Boolean sourceVerification(byte[] dataS) {
         boolean flag = false;
         //获取系统类型-第5个字节
         String sourceSystemType = ByteConvertUtils.bytesToString(dataS,4,5);
@@ -60,7 +59,7 @@ public class HandlerUtilForUDP {
             flag = true;
         }
         return flag;
-    }
+    }*/
     /**
      * @Description: 消息头组包方法
      * @Author: gaosong
@@ -68,7 +67,7 @@ public class HandlerUtilForUDP {
      * @param messageBytes: 组包对象
      * @return: void
      **/
-    public static void messageHeaderPackage(byte[] messageBytes){
+/*    public static void messageHeaderPackage(byte[] messageBytes){
         //设置帧同步-1字节
         messageBytes[0] = (byte)0xBE;
 
@@ -142,7 +141,7 @@ public class HandlerUtilForUDP {
         //备用字节-4字节
         byte[] reserved = ByteConvertUtils.intToBytesLittle(0);
         System.arraycopy(reserved,0,messageBytes,29,4);
-    }
+    }*/
     /**
      * @Description: 执行自检程序并将自检结果按照协议组包
      * @Author: gaosong
@@ -151,85 +150,168 @@ public class HandlerUtilForUDP {
      * @return: byte[]
      **/
     public static byte[] selfInspectionPack(MonitorInfoBean monitorInfoBean) {
-        //创建待返回字节数组(帧头+9*信息字0=34+9*12=142)
-        byte[] messageBytes = new byte[142];
+        //消息通信自字节数组 下标:45+14*9=171,长度为172
+        byte[] resultBytes = new byte[172];
+        //设置帧同步-1字节
+        resultBytes[0] = (byte)0xBE;
 
-        //信息头组包方法
-        messageHeaderPackage(messageBytes);
+        //帧长-2字节
+        byte[] frameLengthBytes = ByteConvertUtils.short2byteLittle((short) 172);
+        System.arraycopy(frameLengthBytes,0,resultBytes,1,2);
 
-        //组包9个信息字
-        //表号-2字节-信息字表号相同
-        byte[] tableNum = ByteConvertUtils.short2byteLittle((short)4270);
+        //帧类型-1字节
+        resultBytes[3] = (byte)0;
+
+        //信源(日志服务)-系统类型 -1字节
+        byte receiveSystemTypeBytes = Byte.parseByte(LoadConfig.getInstance().getReceiveSystemType());
+        resultBytes[4] = receiveSystemTypeBytes;
+
+        //信源(日志服务)-系统编码 -2字节
+        byte[] receiveSystemCodeBytes = ByteConvertUtils.short2byteLittle(Short.parseShort(
+                LoadConfig.getInstance().getReceiveSystemCode()));
+        System.arraycopy(receiveSystemCodeBytes,0,resultBytes,5,2);
+
+        //信源(日志服务)-节点编码 -1字节
+        byte receiveNodeCodeBytes = Byte.parseByte(LoadConfig.getInstance().getReceiveNodeCode());
+        resultBytes[7] = receiveNodeCodeBytes;
+
+        //信宿(自检服务)-系统类型 -1字节
+        byte sourceSystemTypeBytes = Byte.parseByte(LoadConfig.getInstance().getSourceSystemType());
+        resultBytes[8] = sourceSystemTypeBytes;
+
+        //信宿(自检服务)-系统编码 -2字节
+        byte[] sourceSystemCodeBytes = ByteConvertUtils.short2byteLittle(Short.parseShort(LoadConfig.getInstance().getSourceSystemCode()));
+        System.arraycopy(sourceSystemCodeBytes,0,resultBytes,9,2);
+
+        //信宿(自检服务)-节点编码 -1字节
+        byte sourceNodeCodeBytes = Byte.parseByte(LoadConfig.getInstance().getSourceNodeCode());
+        resultBytes[11] = sourceNodeCodeBytes;
+
+        //日期-年-2字节
+        byte[] yearBytes = ByteConvertUtils.short2byteLittle(Short.parseShort(getSysYear()));
+        System.arraycopy(yearBytes,0,resultBytes,12,2);
+
+        //日期-月-1字节
+        byte monthBytes = Byte.parseByte(getSysMonth());
+        resultBytes[14] = monthBytes;
+
+        //日期-日-1字节
+        byte dayBytes = Byte.parseByte(getSysDay());
+        resultBytes[15] = dayBytes;
+
+        //日期-时间-4字节
+        byte[] timeBytes = ByteConvertUtils.intToBytesLittle(getSysTime());
+        System.arraycopy(timeBytes,0,resultBytes,16,4);
+
+        //帧序号/确认帧序号 -4字节
+        byte[] frameNum = ByteConvertUtils.intToBytesLittle(1);
+        System.arraycopy(frameNum,0,resultBytes,20,4);
+
+        //确认标志-1字节
+        byte confirmMark = (byte)0x00;
+        resultBytes[24] = confirmMark;
+
+        //重传次数-1字节
+        byte retransmissionTimes =(byte) 0x00;
+        resultBytes[25] = retransmissionTimes;
+
+        //信息字类型-1字节
+        byte informationWord = (byte)3;
+        resultBytes[26] = informationWord;
+
+        //信息字格式-2字节
+        byte[] informationWordNum = ByteConvertUtils.short2byteLittle((short)256);
+        System.arraycopy(informationWordNum,0,resultBytes,27,2);
+
+        //备用字节-4字节
+        byte[] reserved = ByteConvertUtils.intToBytesLittle(0);
+        System.arraycopy(reserved,0,resultBytes,29,4);
+
+        //--------组织消息通信信息头---------
+        //消息发送方软件标识字符串长度
+        resultBytes[34] = (byte)0;
+        //消息发送方软件标识字符串
+        //resultBytes[35] = (byte)0;
+        //消息接收方软件标识字符串长度
+        resultBytes[35] = (byte)0;
+        //消息接收方软件标识字符串
+        //resultBytes[37] = (byte)0;
+        //消息通信信息字类型
+        resultBytes[36] = (byte)0;
+        //消息通信信息字个数
+        byte[] informationWordNums = ByteConvertUtils.short2byteLittle((short) 9);
+        System.arraycopy(informationWordNums,0,resultBytes,37,2);
+        //表号
+        byte[] tableNum = ByteConvertUtils.short2byteLittle((short) 4270);
+        System.arraycopy(tableNum,0,resultBytes,39,2);
+        //优先级
+        resultBytes[41] = (byte)1;
+        //备用字符串长度
+        resultBytes[42] = (byte)1;
+        //备用字符串
+        resultBytes[43] = (byte)1;
+
+        //--------组织消息通信信息字---------
+        //第1-3个信息字,前三个信息字固定为14字节
         for(int i=1;i<=9;i++){
-            //存储第i个信息字-表号-2字节
-            System.arraycopy(tableNum,0,messageBytes,34+12*(i-1),2);
-
-            //存储第i个信息字-编码-2字节
-            byte[] code = ByteConvertUtils.short2byteLittle((short)i);
-            System.arraycopy(code,0,messageBytes,34+12*(i-1)+2,2);
-
-            if(i==1){
-                //存储第1个信息字-数据-4字节,将配置文件日志服务(信宿-系统类型)按照4字节存储
-                byte[] receiveSystemType = ByteConvertUtils.intToBytesLittle(Integer.parseInt(LoadConfig.getInstance()
-                        .getReceiveSystemType()));
-                System.arraycopy(receiveSystemType,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==2){
-                //存储第2个信息字-数据-4字节,将配置文件日志服务(信宿-系统编码)按照4字节存储
-                byte[] receiveSystemCode = ByteConvertUtils.intToBytesLittle(Integer.parseInt(LoadConfig.getInstance()
-                        .getReceiveSystemCode()));
-                System.arraycopy(receiveSystemCode,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==3){
-                //存储第3个信息字-数据-4字节,将配置文件日志服务(信宿-节点编码)按照4字节存储
-                byte[] receiveNodeCode = ByteConvertUtils.intToBytesLittle(Integer.parseInt(LoadConfig.getInstance()
-                        .getReceiveNodeCode()));
-                System.arraycopy(receiveNodeCode,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==4){
-                //存储第4个信息字-数据-4字节,将配置文件日志服务(软件登录用户id)按照4字节存储
-                byte[] receiveUserID = ByteConvertUtils.intToBytesLittle(0);
-                System.arraycopy(receiveUserID,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==5){
-                //存储第5个信息字-数据-4字节,将配置文件日志服务(软件唯一标识)按照4字节存储
-                byte[] uniqueIdentification = ByteConvertUtils.intToBytesLittle(0);
-                System.arraycopy(uniqueIdentification,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==6){
-                //存储第6个信息字-数据-4字节,将配置文件日志服务(软件版本号)按照4字节存储
-                byte[] versionNumber = "2.02".getBytes(StandardCharsets.UTF_8);
-                System.arraycopy(versionNumber,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==7){
-                //存储第7个信息字-数据-4字节,将配置文件日志服务(软件自检结果)按照4字节存储
-                byte[] checkSelfResult = ByteConvertUtils.intToBytesLittle(1);
-                System.arraycopy(checkSelfResult,0,messageBytes,34+12*(i-1)+4,4);
-            }else if(i==8){
-                //存储第8个信息字-数据-4字节,将配置文件日志服务(软件CPU占用情况)按照4字节存储
-                byte[] CPURatio = ByteConvertUtils.float2byteLittle(monitorInfoBean.getCpuRatio());
-                System.arraycopy(CPURatio,0,messageBytes,34+12*(i-1)+4,4);
+            //第i个信息字-格式-1字节
+            resultBytes[44+14*(i-1)] = (byte)0;
+            //第i个信息字-编码-2字节
+            byte[] code_one = ByteConvertUtils.short2byteLittle((short) i);
+            System.arraycopy(code_one,0,resultBytes,45+14*(i-1),2);
+            //第i个信息字-数据类型-1字节
+            if(i==1||i==2||i==3||i==7){
+                resultBytes[47+14*(i-1)] = (byte)1;//int类型
+            }else if(i==4||i==5||i==6){
+                resultBytes[47+14*(i-1)] = (byte)4;//String类型
             }else {
-                //存储第9个信息字-数据-4字节,将配置文件日志服务(软件内存占用情况)按照4字节存储
-                byte[] usedMemory = ByteConvertUtils.float2byteLittle(monitorInfoBean.getUsedMemory());
-                System.arraycopy(usedMemory,0,messageBytes,34+12*(i-1)+4,4);
+                resultBytes[47+14*(i-1)] = (byte)2;//float类型
             }
-
-            //存储第i个信息字-数据类型-1字节
-            if(i!=8 && i!=9){
-                byte dataType = (byte)2;
-                messageBytes[34+12*(i-1)+8] = dataType;
-            }else{
-                byte dataType = (byte)1;
-                messageBytes[34+12*(i-1)+8] = dataType;
+            //第i个信息字-超差标记-1字节
+            resultBytes[48+14*(i-1)] = (byte)1;
+            //第i个信息字-弹编号-2字节
+            byte[] missileCode_one = ByteConvertUtils.short2byteLittle((short) 1);
+            System.arraycopy(missileCode_one,0,resultBytes,49+14*(i-1),2);
+            //第i个信息字-字符串数据长度-1字节
+            resultBytes[51+14*(i-1)] = (byte)4;
+            //第i个信息字-数据-4字节
+            if(i==1){//获取系统类型
+                byte[] systemType_one = ByteConvertUtils.intToBytesLittle(Integer.parseInt(
+                        LoadConfig.getInstance().getReceiveSystemType()));
+                System.arraycopy(systemType_one,0,resultBytes,52+14*(i-1),4);
+            }else if(i==2){//获取系统编码
+                byte[] systemCode_one = ByteConvertUtils.intToBytesLittle(Integer.parseInt(
+                        LoadConfig.getInstance().getReceiveSystemCode()));
+                System.arraycopy(systemCode_one,0,resultBytes,52+14*(i-1),4);
+            }else if(i==3){//获取节点编码
+                byte[] nodeCode_one = ByteConvertUtils.intToBytesLittle(Integer.parseInt(
+                        LoadConfig.getInstance().getReceiveNodeCode()));
+                System.arraycopy(nodeCode_one,0,resultBytes,52+14*(i-1),4);
+            }else if(i==4||i==5||i==6){//第4、5、6个信息字为字符串类型,由于为用到统一写为V2.12
+                byte[] frame_string  = "2.12".getBytes(StandardCharsets.UTF_8);
+                System.arraycopy(frame_string,0,resultBytes,52+14*(i-1),4);
+            }else if(i==7){//软件自检结果,固定写1
+                byte[] selfInspectionResult  = ByteConvertUtils.intToBytesLittle(1);
+                System.arraycopy(selfInspectionResult,0,resultBytes,52+14*(i-1),4);
+            }else if(i==8){//软件CPU占用情况
+                byte[] CPURatio = ByteConvertUtils.float2byte(monitorInfoBean.getCpuRatio());
+                System.arraycopy(CPURatio,0,resultBytes,52+14*(i-1),4);
+            }else{//第九个信息字,软件内存占用情况
+                byte[] usedMemory = ByteConvertUtils.float2byte(monitorInfoBean.getUsedMemory());
+                System.arraycopy(usedMemory,0,resultBytes,52+14*(i-1),4);
             }
-
-            //井编号-2字节
-            byte[] wellNum = ByteConvertUtils.short2byteLittle((short)0);
-            System.arraycopy(wellNum,0,messageBytes,34+12*(i-1)+9,2);
-
-            //备用-1字节 (不使用，填充为0)
-            messageBytes[34+12*(i-1)+11] = (byte)0;
+            //第i个信息字-备用字符串长度-1字节
+            resultBytes[56+14*(i-1)] = (byte)1;
+            //第i个信息字-备用字符串-1字节
+            resultBytes[56+14*(i-1)] = (byte)1;
         }
 
-        //校验和-1字节-最后计算
-        byte checkSum = checkSum(messageBytes);
-        messageBytes[33] = checkSum;
-        return messageBytes;
+        //计算校验和
+        byte checkSum = checkSum(resultBytes);
+        resultBytes[33] = checkSum;
+        //返回结果
+        return resultBytes;
+
     }
     /**
      * @Description: 计算校验和-下标为33不计算在内

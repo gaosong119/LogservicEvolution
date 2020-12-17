@@ -1,7 +1,6 @@
 package com.aerotop.logserviceevolution;
 
 import com.aerotop.logserviceevolution.monitor.MonitorServiceImpl;
-import com.aerotop.logserviceevolution.selfinspection.CommunicationPackage;
 import com.aerotop.logserviceevolution.selfinspection.HandlerUtilForUDP;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,8 +20,7 @@ class LogserviceframeupApplicationTests {
         System.out.println("原数组内容:---->"+bytes);
         System.out.println("toString后内容:"+ Arrays.toString(bytes));*/
         MonitorServiceImpl monitorService = new MonitorServiceImpl();
-        byte[] bytes = CommunicationPackage.resultPackage(HandlerUtilForUDP.selfInspectionPack(
-                monitorService.getMonitorInfoBean()));
+        byte[] bytes = HandlerUtilForUDP.selfInspectionPack(monitorService.getMonitorInfoBean());
 
         System.out.println("字节数组长度:"+bytes.length);
         System.out.println("十六进制字符串:");
