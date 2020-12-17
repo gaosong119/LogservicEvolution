@@ -43,7 +43,9 @@ public class LoadConfig {
 
     private String sourceNodeCode;//信源-节点编码
 
-    private String sourceSoftID;//信源-软件标识
+    private String sourceUserLoginID;//信源-软件登录用户id
+
+    private String sourceSoftUniqueID;//信源-软件唯一标识
 
     private String receiveSystemType;//信宿-系统类型
 
@@ -51,7 +53,9 @@ public class LoadConfig {
 
     private String receiveNodeCode;//信宿-节点编码
 
-    private String receiveSoftID;//信宿-软件标识
+    private String receiveUserLoginID;//信宿-软件登录用户id
+
+    private String receiveSoftUniqueID;//信宿-软件唯一标识
 
     private Properties props;//用来初始化props
 
@@ -66,20 +70,36 @@ public class LoadConfig {
         return instance;
     }
 
-    public String getReceiveSoftID() {
-        return receiveSoftID;
+    public String getReceiveSoftUniqueID() {
+        return receiveSoftUniqueID;
     }
-    @Value("${source_soft_ID}")
-    public void setReceiveSoftID(String receiveSoftID) {
-        instance.receiveSoftID = receiveSoftID;
+    @Value("${receive_soft_unique_identification}")
+    public void setReceiveSoftUniqueID(String receiveSoftUniqueID) {
+        instance.receiveSoftUniqueID = receiveSoftUniqueID;
     }
 
-    public String getSourceSoftID() {
-        return sourceSoftID;
+    public String getReceiveUserLoginID() {
+        return receiveUserLoginID;
     }
-    @Value("${source_soft_ID}")
-    public void setSourceSoftID(String sourceSoftID) {
-        instance.sourceSoftID = sourceSoftID;
+    @Value("${receive_user_login_ID}")
+    public void setReceiveUserLoginID(String receiveUserLoginID) {
+        instance.receiveUserLoginID = receiveUserLoginID;
+    }
+
+    public String getSourceUserLoginID() {
+        return sourceUserLoginID;
+    }
+    @Value("${source_user_login_ID}")
+    public void setSourceUserLoginID(String sourceUserLoginID) {
+        instance.sourceUserLoginID = sourceUserLoginID;
+    }
+
+    public String getSourceSoftUniqueID() {
+        return sourceSoftUniqueID;
+    }
+    @Value("${source_soft_unique_identification}")
+    public void setSourceSoftUniqueID(String sourceSoftUniqueID) {
+        instance.sourceSoftUniqueID = sourceSoftUniqueID;
     }
 
     public String getReceivePort() {

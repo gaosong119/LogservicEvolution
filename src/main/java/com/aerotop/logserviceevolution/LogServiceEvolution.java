@@ -20,7 +20,8 @@ public class LogServiceEvolution {
     // 版本文件生成路径
     @Value("${versionPath}")
     private String versionPath;
-
+    //版本文件写入内容
+    public static final String versionCount = "v2.12-20201212-1600";
     // 创建全局写入对象
     public static final WriterServiceImpl writerServiceImpl = new WriterServiceImpl();
     //日志记录对象
@@ -68,16 +69,16 @@ public class LogServiceEvolution {
     @PostConstruct
     private void createVersionFile() {
         try {
-            String versionCount = "v2.12-20201212-1600";
             File directory = new File(versionPath);
             File file;
             if(!directory.exists()){
                 directory.mkdirs();
             }
-            file = new File(versionPath + "/version.ini");
-            if(!file.exists()){
-                file.createNewFile();
-            }
+            file = new File(versionPath + "/version-RZFW.ini");
+            //if(!file.exists()){
+            //每次都创建并覆盖
+            file.createNewFile();
+            //}
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(versionCount);
             fileWriter.close();
