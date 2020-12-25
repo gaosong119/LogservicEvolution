@@ -76,6 +76,8 @@ public class LoadConfig {
     @Value("${receive_soft_unique_identification}")
     public void setReceiveSoftUniqueID(String receiveSoftUniqueID) {
         instance.receiveSoftUniqueID = receiveSoftUniqueID;
+        message.setReserved("加载信宿-软件唯一标识:"+receiveSoftUniqueID);
+        LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
     public String getReceiveUserLoginID() {
@@ -84,6 +86,8 @@ public class LoadConfig {
     @Value("${receive_user_login_ID}")
     public void setReceiveUserLoginID(String receiveUserLoginID) {
         instance.receiveUserLoginID = receiveUserLoginID;
+        message.setReserved("加载信宿-软件登录用户id:"+receiveUserLoginID);
+        LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
     public String getSourceUserLoginID() {
@@ -92,6 +96,8 @@ public class LoadConfig {
     @Value("${source_user_login_ID}")
     public void setSourceUserLoginID(String sourceUserLoginID) {
         instance.sourceUserLoginID = sourceUserLoginID;
+        message.setReserved("加载信源-软件登录用户id:"+sourceUserLoginID);
+        LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
     public String getSourceSoftUniqueID() {
@@ -100,6 +106,8 @@ public class LoadConfig {
     @Value("${source_soft_unique_identification}")
     public void setSourceSoftUniqueID(String sourceSoftUniqueID) {
         instance.sourceSoftUniqueID = sourceSoftUniqueID;
+        message.setReserved("加载信源-软件唯一标识:"+sourceSoftUniqueID);
+        LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
     public String getReceivePort() {

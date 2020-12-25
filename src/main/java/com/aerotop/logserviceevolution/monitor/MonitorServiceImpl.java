@@ -31,7 +31,7 @@ public class MonitorServiceImpl implements IMonitorService{
     //错误信息长度
     private static final int FAULTLENGTH = 10;
     /**
-     * @Description: 获得当前的监控对象
+     * @Description: 获得当前的监控对象自检结果
      * @Author: gaosong
      * @Date: 2020/11/24 9:26
      * @return: com.aerotop.logserviceevolution.monitor.MonitorInfoBean
@@ -153,7 +153,7 @@ public class MonitorServiceImpl implements IMonitorService{
      * @Description: 获取windows环境下CPU使用率
      * @Author: gaosong
      * @Date: 2020/11/24 9:40
-     * @return: double
+     * @return: float
      **/
     private float getCpuRatioForWindows() {
         try {
