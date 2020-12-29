@@ -35,6 +35,8 @@ public class LoadConfig {
 
     private String receivePort;//接收方端口
 
+    private String feedbackIp;//自检软件Ip地址
+
     private String feedbackPort;//自检软件接收端口
 
     private String sourceSystemType;//信源-系统类型
@@ -68,6 +70,16 @@ public class LoadConfig {
      */
     public static LoadConfig getInstance(){
         return instance;
+    }
+
+    public String getFeedbackIp() {
+        return feedbackIp;
+    }
+    @Value("${feedbackIp}")
+    public void setFeedbackIp(String feedbackIp) {
+        instance.feedbackIp = feedbackIp;
+        message.setReserved("加载自检软件IP地址:"+feedbackIp);
+        LogServiceEvolution.writerServiceImpl.logger(message);
     }
 
     public String getReceiveSoftUniqueID() {
