@@ -14,7 +14,6 @@ import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @ClassName: MessageReceiverThread
@@ -78,11 +77,5 @@ public class MessageReceiverThread extends Thread {
             message.setReserved(baoS.toString());
             LogServiceEvolution.writerServiceImpl.logger(message);
         }
-    }
-
-    public static void main(String[] args) {
-        String a = "abc123/";
-        String remove = StringUtils.remove(a, "/");
-        System.out.println(remove);
     }
 }
